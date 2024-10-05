@@ -1,14 +1,17 @@
-const express = require('express')
-const router = express.Router()
-
-
-const { getAllBlogPost,
+import express, { Router } from 'express';
+import { 
+    getAllBlogPost,
     getSingleBlogPost,
     createBlogPost,
     updateBlogPost,
-    deleteBlogPost } = require('../controllers/blog')
+    deleteBlogPost 
+} from '../controllers/blog';
 
-router.route('/').post(createBlogPost).get(getAllBlogPost)
-router.route('/:id').get(getSingleBlogPost).delete(deleteBlogPost).patch(updateBlogPost)
+const router: Router = Router();
 
-module.exports = router
+// Define routes
+router.route('/').post(createBlogPost).get(getAllBlogPost);
+router.route('/:id').get(getSingleBlogPost).delete(deleteBlogPost).patch(updateBlogPost);
+
+// Export the router
+export default router;

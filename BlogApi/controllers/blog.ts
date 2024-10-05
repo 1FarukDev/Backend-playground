@@ -1,29 +1,35 @@
 import express, { Request, Response } from 'express';
 
-const getAllBlogPost = async (req: Request, res: Response) => {
-    res.send('get all blog')
-}
+// Controller to get all blog posts
+const getAllBlogPost = async (req: Request, res: Response): Promise<void> => {
+    res.send('Get all blog posts');
+};
 
-const getSingleBlogPost = async (req: Request, res: Response) => {
-    res.send('get single blog')
-}
+// Controller to get a single blog post by ID
+const getSingleBlogPost = async (req: Request, res: Response): Promise<void> => {
+    res.send('Get single blog post');
+};
 
-const createBlogPost = async (req: Request, res: Response) => {
-    res.send('create new blog')
-}
+// Controller to create a new blog post
+const createBlogPost = async (req: Request, res: Response): Promise<void> => {
+    res.send('Create new blog post');
+};
 
-const updateBlogPost = async (req: Request, res: Response) => {
-    res.send('update blog')
-}
+// Controller to update an existing blog post
+const updateBlogPost = async (req: Request, res: Response): Promise<void> => {
+    res.send('Update blog post');
+};
 
-const deleteBlogPost = async (req: Request, res: Response) => {
-    res.send('delete blog post')
-}
+// Controller to delete a blog post
+const deleteBlogPost = async (req: Request, res: Response): Promise<void> => {
+    res.send('Delete blog post');
+};
 
-module.exports = {
+// Exporting the controllers
+export {
     getAllBlogPost,
     getSingleBlogPost,
     createBlogPost,
     updateBlogPost,
     deleteBlogPost
-}
+};
