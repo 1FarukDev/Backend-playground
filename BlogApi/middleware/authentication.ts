@@ -8,7 +8,15 @@ interface JwtPayload {
   name: string;
 }
 
-const auth = async (req: Request, res: Response, next: NextFunction) => {
+// Extend the Request interface to include the user property
+interface AuthenticatedRequest extends Request {
+  user?: {
+    userId: string;
+    name: string;
+  };
+}
+
+const auth = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   // Check header
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith('Bearer ')) {

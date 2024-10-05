@@ -9,7 +9,11 @@ import authRouter from './routes/auth';
 
 // Import the notFound middleware
 import notFound from './middleware/not-found';
+// Import the errorHandler middleware
 import errorHandlerMiddleware from './middleware/error-handler'
+// Import the authenticate middleware
+import authenticateMiddleware from './middleware/authentication'
+
 
 dotenv.config();
 const app = express();
