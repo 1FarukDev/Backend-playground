@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import { ErrorRequestHandler } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
 interface CustomError {
@@ -6,48 +6,71 @@ interface CustomError {
   msg: string;
 }
 
-// Define a more specific type for validation errors
 interface ValidationError {
   message: string;
 }
 
-// Middleware for handling errors
-const errorHandlerMiddleware = (
-  err: any, // You might create a more specific type for your errors
-  req: Request,
-  res: Response,
-  next: NextFunction
+const errorHandlerMiddleware: ErrorRequestHandler = (
+  err: any,
+  req,
+  res,
+  next
 ) => {
-  let CustomError: CustomError = {
-    // Set default
+  let customError: CustomError = {
     statusCode: err.statusCode || StatusCodes.INTERNAL_SERVER_ERROR,
     msg: err.message || 'Something went wrong, please try again later',
   };
 
   // Handle validation errors
   if (err.name === 'ValidationError') {
-    const messages = Object.values(err.errors).map((item) => {
-      // Assert item as ValidationError
+    const messages = Object.values(err.errors).map((item: any) => {
       const validationError = item as ValidationError; 
       return validationError.message;
     });
-    CustomError.msg = messages.join(',');
-    CustomError.statusCode = StatusCodes.BAD_REQUEST;
+    customError.msg = messages.join(', ');
+    customError.statusCode = StatusCodes.BAD_REQUEST;
   }
 
   // Handle duplicate key error
   if (err.code && err.code === 11000) {
-    CustomError.msg = `Duplicate value entered for ${Object.keys(err.keyValue)} field, please choose another value.`;
-    CustomError.statusCode = StatusCodes.BAD_REQUEST;
+    customError.msg = `Duplicate value entered for ${Object.keys(err.keyValue)} field, please choose another value.`;
+    customError.statusCode = StatusCodes.BAD_REQUEST;
   }
 
   // Handle cast errors (invalid ObjectId)
   if (err.name === 'CastError') {
-    CustomError.msg = `No item found with id: ${err.value}`;
-    CustomError.statusCode = StatusCodes.NOT_FOUND;
+    customError.msg = `No item found with id: ${err.value}`;
+    customError.statusCode = StatusCodes.NOT_FOUND;
   }
 
-  return res.status(CustomError.statusCode).json({ msg: CustomError.msg });
+  // Handle JWT errors
+  if (err.name === 'JsonWebTokenError') {
+    customError.msg = 'Invalid token. Please log in again.';
+    customError.statusCode = StatusCodes.UNAUTHORIZED;
+  }
+
+  // Handle expired JWT
+  if (err.name === 'TokenExpiredError') {
+    customError.msg = 'Your token has expired. Please log in again.';
+    customError.statusCode = StatusCodes.UNAUTHORIZED;
+  }
+
+  // Handle file upload errors
+  if (err.name === 'MulterError') {
+    customError.msg = `File upload error: ${err.message}`;
+    customError.statusCode = StatusCodes.BAD_REQUEST;
+  }
+
+  // Handle database connection errors
+  if (err.name === 'MongooseError' || err.name === 'MongoError') {
+    customError.msg = 'Database error. Please try again later.';
+    customError.statusCode = StatusCodes.INTERNAL_SERVER_ERROR;
+  }
+
+  // Log the error for debugging (you might want to use a proper logging library in production)
+  console.error(err);
+
+  res.status(customError.statusCode).json({ msg: customError.msg });
 };
 
 export default errorHandlerMiddleware;

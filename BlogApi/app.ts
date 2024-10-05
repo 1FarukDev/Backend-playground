@@ -7,12 +7,13 @@ import connectDB from './db/connect';
 import blogsRouter from './routes/blog';
 import authRouter from './routes/auth';
 
-// Load environment variables from .env file
-dotenv.config();
+// Import the notFound middleware
+import notFound from './middleware/not-found';
+import errorHandlerMiddleware from './middleware/error-handler'
 
+dotenv.config();
 const app = express();
 
-// Middleware to parse JSON requests
 app.use(express.json());
 
 // Basic route
@@ -20,11 +21,15 @@ app.get('/', (req: Request, res: Response) => {
     res.send('Hello, TypeScript with Express!');
 });
 
-// Use routers
+// Routers
 app.use('/api/v1/blog', blogsRouter);
 app.use('/api/v1/auth', authRouter);
 
-// Define the port
+// Use the 404 middleware after all routes
+app.use(notFound);
+app.use(errorHandlerMiddleware);
+
+// Start server code as before
 const port = process.env.PORT || 3000;
 
 const startServer = async () => {
@@ -35,11 +40,9 @@ const startServer = async () => {
             throw new Error('MONGO_URI is not defined in the environment variables');
         }
 
-        // Connect to the database
         await connectDB(mongoURI);
         console.log('Database connected');
 
-        // Start the server
         app.listen(port, () => {
             console.log(`Server is running on port ${port}`);
         });
@@ -48,5 +51,4 @@ const startServer = async () => {
     }
 };
 
-// Start the server
 startServer();
