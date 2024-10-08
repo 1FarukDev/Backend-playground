@@ -6,10 +6,11 @@ interface IBlog extends Document {
     content: string;
     excerpt: string;
     image: string;        // Image URL or path
-    author: mongoose.Types.ObjectId;
+    authorId: mongoose.Types.ObjectId;
     tags: string[];
     createdAt: Date;
     updatedAt: Date;
+    authorName: string
 }
 
 const BlogSchema: Schema<IBlog> = new mongoose.Schema(
@@ -31,7 +32,7 @@ const BlogSchema: Schema<IBlog> = new mongoose.Schema(
             type: String,      // Store the URL or path of the image
             required: false,   // The image is optional
         },
-        author: {
+        authorId: {
             type: Schema.Types.ObjectId,
             ref: 'User',       // Reference to the User model for the author
             required: [true, 'Please provide an author'],
@@ -39,6 +40,10 @@ const BlogSchema: Schema<IBlog> = new mongoose.Schema(
         tags: {
             type: [String],    // Array of strings for tags
             default: [],       // Default value is an empty array
+        },
+        authorName: {
+            type: String,    // Array of strings for tags
+            required: false       // Default value is an empty array
         },
     },
     { timestamps: true }       // Automatically adds createdAt and updatedAt fields

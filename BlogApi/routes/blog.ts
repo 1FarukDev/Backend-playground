@@ -1,7 +1,7 @@
 import express, { Router } from 'express';
 import authenticateMiddleware from '../middleware/authentication'
 import {
-    getAllBlogPost,
+    getAllBlogPosts,
     getSingleBlogPost,
     createBlogPost,
     updateBlogPost,
@@ -11,7 +11,7 @@ import {
 const router: Router = Router();
 
 // Define routes
-router.route('/').get(getAllBlogPost);
+router.route('/').get(getAllBlogPosts);
 
 // Protected routes: Only authenticated users can create, update, or delete posts
 router.route('/').post(authenticateMiddleware, createBlogPost);

@@ -11,8 +11,7 @@ import authRouter from './routes/auth';
 import notFound from './middleware/not-found';
 // Import the errorHandler middleware
 import errorHandlerMiddleware from './middleware/error-handler'
-// Import the authenticate middleware
-import authenticateMiddleware from './middleware/authentication'
+
 
 
 dotenv.config();

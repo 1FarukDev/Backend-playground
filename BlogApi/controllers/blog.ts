@@ -1,33 +1,93 @@
-import express, { Request, Response } from 'express';
+import express, { Request, Response, NextFunction } from 'express';
+import Blog from '../models/Blog';
+import { StatusCodes } from 'http-status-codes';
+import mongoose from 'mongoose';
 
-// Controller to get all blog posts
-const getAllBlogPost = async (req: Request, res: Response): Promise<void> => {
-    res.send('Get all blog posts');
+interface AuthenticatedRequest extends Request {
+    user?: {
+        userId: string;
+        name: string;
+    };
+}
+
+const getAllBlogPosts = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const blogs = await Blog.find({});
+        res.status(StatusCodes.OK).json({ blogs, count: blogs.length });
+    } catch (error) {
+        next(error);
+    }
 };
 
-// Controller to get a single blog post by ID
-const getSingleBlogPost = async (req: Request, res: Response): Promise<void> => {
-    res.send('Get single blog post');
+const getSingleBlogPost = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const { id } = req.params;
+        const blog = await Blog.findById(id);
+        if (!blog) {
+            const error = new Error('Blog post not found') as any;
+            error.statusCode = StatusCodes.NOT_FOUND;
+            throw error;
+        }
+        res.status(StatusCodes.OK).json({ blog });
+    } catch (error) {
+        next(error);
+    }
 };
 
-// Controller to create a new blog post
-const createBlogPost = async (req: Request, res: Response): Promise<void> => {
-    res.send('Create new blog post');
+const createBlogPost = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        if (!req.user || !req.user.userId) {
+            const error = new Error('Unauthorized') as any;
+            error.statusCode = StatusCodes.UNAUTHORIZED;
+            throw error;
+        }
+        req.body.authorId = req.user.userId;
+        const blog = await Blog.create(req.body);
+        res.status(StatusCodes.CREATED).json({ blog });
+    } catch (error) {
+        next(error);
+    }
 };
 
-// Controller to update an existing blog post
-const updateBlogPost = async (req: Request, res: Response): Promise<void> => {
-    res.send('Update blog post');
+const updateBlogPost = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+    res.send('update blog post')
 };
 
-// Controller to delete a blog post
-const deleteBlogPost = async (req: Request, res: Response): Promise<void> => {
-    res.send('Delete blog post');
+const deleteBlogPost = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const { id } = req.params;
+        const { userId } = req.user || {};
+
+        if (!userId) {
+            const error = new Error('Unauthorized') as any;
+            error.statusCode = StatusCodes.UNAUTHORIZED;
+            throw error;
+        }
+
+    
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            const error = new Error('Invalid blog post ID') as any;
+            error.statusCode = StatusCodes.BAD_REQUEST;
+            throw error;
+        }
+
+        const blog = await Blog.findOneAndDelete({ _id: id, authorId: userId });
+    
+        if (!blog) {
+            const error = new Error('Blog post not found or you are not authorized to delete it') as any;
+            error.statusCode = StatusCodes.NOT_FOUND;
+            throw error;
+        }
+
+        res.status(StatusCodes.OK).json({ message: 'Blog post deleted successfully' });
+    } catch (error) {
+        next(error);
+    }
 };
 
-// Exporting the controllers
+
 export {
-    getAllBlogPost,
+    getAllBlogPosts,
     getSingleBlogPost,
     createBlogPost,
     updateBlogPost,
