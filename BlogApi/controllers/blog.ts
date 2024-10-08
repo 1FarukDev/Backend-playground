@@ -50,7 +50,29 @@ const createBlogPost = async (req: AuthenticatedRequest, res: Response, next: Ne
 };
 
 const updateBlogPost = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
-    res.send('update blog post')
+    try {
+        const { id } = req.params
+        const { userId } = req.user || {}
+        if (!userId) {
+            const error = new Error('Unauthorized') as any;
+            error.statusCode = StatusCodes.UNAUTHORIZED;
+            throw error;
+        }
+        const blog = await Blog.findOneAndUpdate(
+            { _id: id, authorId: userId },
+            req.body,
+            { new: true, runValidators: true }
+        );
+        if (!blog) {
+            const error = new Error('Blog post not found or you are not authorized to update it') as any;
+            error.statusCode = StatusCodes.NOT_FOUND;
+            throw error;
+        }
+        res.status(StatusCodes.OK).json({ blog });
+    } catch (error) {
+        next(error)
+    }
+
 };
 
 const deleteBlogPost = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
@@ -64,7 +86,7 @@ const deleteBlogPost = async (req: AuthenticatedRequest, res: Response, next: Ne
             throw error;
         }
 
-    
+
         if (!mongoose.Types.ObjectId.isValid(id)) {
             const error = new Error('Invalid blog post ID') as any;
             error.statusCode = StatusCodes.BAD_REQUEST;
@@ -72,7 +94,7 @@ const deleteBlogPost = async (req: AuthenticatedRequest, res: Response, next: Ne
         }
 
         const blog = await Blog.findOneAndDelete({ _id: id, authorId: userId });
-    
+
         if (!blog) {
             const error = new Error('Blog post not found or you are not authorized to delete it') as any;
             error.statusCode = StatusCodes.NOT_FOUND;
