@@ -2,7 +2,7 @@ import mongoose, { Document, Schema } from 'mongoose';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
-// Define the user document interface for TypeScript
+
 interface IUser extends Document {
     name: string;
     email: string;
@@ -34,15 +34,15 @@ const UserSchema: Schema<IUser> = new mongoose.Schema({
     },
 });
 
-// Pre-save hook for hashing password
+
 UserSchema.pre('save', async function (next) {
-    if (!this.isModified('password')) return next(); // Only hash password if it's new or modified
+    if (!this.isModified('password')) return next(); 
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
     next();
 });
 
-// JWT generation method
+
 UserSchema.methods.createJWT = function (): string {
     return jwt.sign(
         { userId: this._id, name: this.name },
@@ -51,10 +51,10 @@ UserSchema.methods.createJWT = function (): string {
     );
 };
 
-// Password comparison method
+
 UserSchema.methods.comparePassword = async function (candidatePassword: string): Promise<boolean> {
     return await bcrypt.compare(candidatePassword, this.password);
 };
 
-// Export the model
+
 export default mongoose.model<IUser>('User', UserSchema);

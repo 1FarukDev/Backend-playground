@@ -1,11 +1,11 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
-// Define the blog document interface for TypeScript
+
 interface IBlog extends Document {
     title: string;
     content: string;
     excerpt: string;
-    image: string;        // Image URL or path
+    image: string;        
     authorId: mongoose.Types.ObjectId;
     tags: string[];
     createdAt: Date;
@@ -25,28 +25,28 @@ const BlogSchema: Schema<IBlog> = new mongoose.Schema(
             required: [true, 'Please provide blog content'],
         },
         excerpt: {
-            type: String,     // Excerpt is a short summary of the content
-            maxlength: 500,    // Limit the excerpt to 500 characters
+            type: String,     
+            maxlength: 500,    
         },
         image: {
-            type: String,      // Store the URL or path of the image
-            required: false,   // The image is optional
+            type: String,      
+            required: false,   
         },
         authorId: {
             type: Schema.Types.ObjectId,
-            ref: 'User',       // Reference to the User model for the author
+            ref: 'User',       
             required: [true, 'Please provide an author'],
         },
         tags: {
-            type: [String],    // Array of strings for tags
-            default: [],       // Default value is an empty array
+            type: [String],    
+            default: [],       
         },
         authorName: {
-            type: String,    // Array of strings for tags
-            required: false       // Default value is an empty array
+            type: String,    
+            required: false       
         },
     },
-    { timestamps: true }       // Automatically adds createdAt and updatedAt fields
+    { timestamps: true }       
 );
 
 export default mongoose.model<IBlog>('Blog', BlogSchema);

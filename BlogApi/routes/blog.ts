@@ -10,15 +10,12 @@ import {
 
 const router: Router = Router();
 
-// Define routes
 router.route('/').get(getAllBlogPosts);
 
-// Protected routes: Only authenticated users can create, update, or delete posts
 router.route('/').post(authenticateMiddleware, createBlogPost);
 router.route('/:id')
-    .get(getSingleBlogPost)  // This can also be public if needed
+    .get(getSingleBlogPost) 
     .patch(authenticateMiddleware, updateBlogPost)
     .delete(authenticateMiddleware, deleteBlogPost);
 
-// Export the router
 export default router;
